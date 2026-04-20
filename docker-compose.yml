@@ -27,18 +27,21 @@ services:
       WORDPRESS_DB_PASSWORD: wp_pass
       WORDPRESS_DB_NAME: wordpress
     volumes:
-      - wp_data:/var/www/html
+      - ./app:/var/www/html
 
-  git-cloner:
-    image: alpine:latest
-    container_name: git_cloner
+  git-updater:
+    image: alpine/git
+    container_name: git_updater
     volumes:
-      - wp_data:/data
-    entrypoint: /bin/sh
-    command: |
-      apk add --no-cache git
-      git clone https://github.com/usuario/tu-repo.git /data/repo
+      - ./app:/repo
+    entrypoint: >
+      sh -c "
+      if [ ! -d /repo/.git ]; then
+        git clone https://github.com/TU_USUARIO/TU_REPO.git /repo;
+      else
+        cd /repo && git pull;
+      fi
+      "
 
 volumes:
   db_data:
-  wp_data:
